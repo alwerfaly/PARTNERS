@@ -84,22 +84,6 @@
     counters.forEach(function(c) { cObs.observe(c); });
   }
 
-  /* ---- Partners ticker: duplicate track for seamless loop ---- */
-  var track = document.querySelector('.partners-ticker__track');
-  if (track) {
-    var clone = track.cloneNode(true);
-    track.parentElement.appendChild(clone);
-    /* Pause on touch start (mobile) */
-    track.parentElement.addEventListener('touchstart', function() {
-      track.style.animationPlayState = 'paused';
-      clone.style.animationPlayState = 'paused';
-    }, { passive: true });
-    track.parentElement.addEventListener('touchend', function() {
-      track.style.animationPlayState = 'running';
-      clone.style.animationPlayState = 'running';
-    }, { passive: true });
-  }
-
   /* ---- Image Carousel ---- */
   function ImgCarousel(el) {
     this.el       = el;
@@ -178,5 +162,73 @@
   ImgCarousel.prototype.resetTimer = function() { this.stopTimer(); this.startTimer(); };
 
   document.querySelectorAll('.img-carousel').forEach(function(el) { new ImgCarousel(el); });
+
+  /* ---- Health category flip cards (tap / keyboard; hover via CSS) ---- */
+  document.querySelectorAll('.health-flip').forEach(function(card) {
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('a.health-flip__more')) return;
+      var on = card.classList.toggle('is-flipped');
+      card.setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+    card.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      if (e.target !== card) return;
+      e.preventDefault();
+      var on = card.classList.toggle('is-flipped');
+      card.setAttribute('aria-expanded', on ? 'true' : 'false');
+    });
+  });
+
+  /* ---- Web3Forms (تواصل + انضم إلينا) ---- */
+  document.querySelectorAll('form.js-web3form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      var btn = form.querySelector('[type="submit"]');
+      var statusEl = form.querySelector('.form-status');
+      var origText = btn ? btn.textContent : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'جاري الإرسال...';
+      }
+      if (statusEl) {
+        statusEl.textContent = '';
+        statusEl.className = 'form-status';
+      }
+
+      var fd = new FormData(form);
+      fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) {
+            if (statusEl) {
+              statusEl.textContent = 'تم إرسال رسالتك بنجاح. سنتواصل معك قريباً.';
+              statusEl.className = 'form-status form-status--ok';
+            }
+            form.reset();
+          } else {
+            if (statusEl) {
+              statusEl.textContent = data.message || 'تعذّر إرسال النموذج. حاول مرة أخرى.';
+              statusEl.className = 'form-status form-status--err';
+            }
+          }
+        })
+        .catch(function() {
+          if (statusEl) {
+            statusEl.textContent = 'تعذّر الاتصال بالخادم. تحقق من الإنترنت وحاول مرة أخرى.';
+            statusEl.className = 'form-status form-status--err';
+          }
+        })
+        .finally(function() {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = origText;
+          }
+        });
+    });
+  });
 
 }());
