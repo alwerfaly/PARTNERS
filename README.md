@@ -36,7 +36,7 @@ optimized-site/
         ├── news-*.jpg      → News images
         ├── health-*.jpg    → Health portal images
         └── partners/       → Partner logo folder (add your logos here)
-            ├── partner-1.png  → السفارة الكندية
+            ├── partner-1.png  → شريك / داعم (يُستبدل بالشعار الفعلي)
             ├── partner-2.png  → وزارة الحكم المحلي
             ├── partner-3.png  → المجلس الأعلى للإدارة المحلية
             ├── partner-4.png  → بلدية بني وليد

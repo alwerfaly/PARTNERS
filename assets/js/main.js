@@ -37,7 +37,7 @@
     scrollBtn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
   }
 
-  /* ---- Studio scroll reveal (IntersectionObserver) ---- */
+  /* ---- Scroll reveal (IntersectionObserver) ---- */
   if ('IntersectionObserver' in window) {
     var revealObserver = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
@@ -83,85 +83,6 @@
     }, { threshold: 0.5 });
     counters.forEach(function(c) { cObs.observe(c); });
   }
-
-  /* ---- Image Carousel ---- */
-  function ImgCarousel(el) {
-    this.el       = el;
-    this.track    = el.querySelector('.img-carousel__track');
-    this.slides   = el.querySelectorAll('.img-carousel__slide');
-    this.prevBtn  = el.querySelector('.img-carousel__btn--prev');
-    this.nextBtn  = el.querySelector('.img-carousel__btn--next');
-    this.dotsWrap = el.querySelector('.img-carousel__dots');
-    this.counter  = el.querySelector('.img-carousel__counter');
-    this.total    = this.slides.length;
-    this.current  = 0;
-    this.ms       = parseInt(el.getAttribute('data-autoplay'), 10) || 4500;
-    this.timer    = null;
-    this.txStart  = 0;
-    this.dots     = [];
-
-    if (!this.total || !this.track) return;
-
-    /* Build dots */
-    var self = this;
-    for (var i = 0; i < this.total; i++) {
-      (function(idx) {
-        var d = document.createElement('button');
-        d.className = 'img-carousel__dot';
-        d.setAttribute('aria-label', '\u0627\u0644\u0635\u0648\u0631\u0629 ' + (idx + 1));
-        d.addEventListener('click', function() { self.goTo(idx); self.resetTimer(); });
-        self.dotsWrap.appendChild(d);
-        self.dots.push(d);
-      }(i));
-    }
-
-    /* Buttons */
-    if (this.prevBtn) this.prevBtn.addEventListener('click', function() { self.prev(); self.resetTimer(); });
-    if (this.nextBtn) this.nextBtn.addEventListener('click', function() { self.next(); self.resetTimer(); });
-
-    /* Pause on hover */
-    el.addEventListener('mouseenter', function() { self.stopTimer(); });
-    el.addEventListener('mouseleave', function() { self.startTimer(); });
-
-    /* Touch / swipe */
-    el.addEventListener('touchstart', function(e) {
-      self.txStart = e.changedTouches[0].clientX;
-      self.stopTimer();
-    }, { passive: true });
-    el.addEventListener('touchend', function(e) {
-      var dx = e.changedTouches[0].clientX - self.txStart;
-      if (Math.abs(dx) > 40) { dx < 0 ? self.next() : self.prev(); }
-      self.startTimer();
-    }, { passive: true });
-
-    /* Keyboard (when focused) */
-    el.setAttribute('tabindex', '0');
-    el.addEventListener('keydown', function(e) {
-      if (e.key === 'ArrowLeft')  { self.next(); self.resetTimer(); }
-      if (e.key === 'ArrowRight') { self.prev(); self.resetTimer(); }
-    });
-
-    this.goTo(0);
-    this.startTimer();
-  }
-
-  ImgCarousel.prototype.goTo = function(idx) {
-    this.current = ((idx % this.total) + this.total) % this.total;
-    this.track.style.transform = 'translateX(-' + (this.current * 100) + '%)';
-    this.dots.forEach(function(d, i) { d.classList.toggle('active', i === this.current); }, this);
-    if (this.counter) this.counter.textContent = (this.current + 1) + ' / ' + this.total;
-  };
-  ImgCarousel.prototype.prev  = function() { this.goTo(this.current - 1); };
-  ImgCarousel.prototype.next  = function() { this.goTo(this.current + 1); };
-  ImgCarousel.prototype.startTimer = function() {
-    var self = this;
-    this.stopTimer();
-    this.timer = setInterval(function() { self.next(); }, self.ms);
-  };
-  ImgCarousel.prototype.stopTimer  = function() { clearInterval(this.timer); this.timer = null; };
-  ImgCarousel.prototype.resetTimer = function() { this.stopTimer(); this.startTimer(); };
-
-  document.querySelectorAll('.img-carousel').forEach(function(el) { new ImgCarousel(el); });
 
   /* ---- Health category flip cards (tap / keyboard; hover via CSS) ---- */
   document.querySelectorAll('.health-flip').forEach(function(card) {
